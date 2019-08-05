@@ -1,0 +1,48 @@
+service: bigdata-image-resizing-api
+
+framework: ">=1.2.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: python3.7
+  region: us-east-1
+  stage: dev
+
+iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+        - "s3:GetObject"
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::belc-bigdata-mdm-images-dev/*"
+
+package:
+  individually: true
+
+plugins:
+  - serverless-python-requirements
+  - serverless-offline
+  - serverless-wsgi
+
+functions:
+  main:
+    handler: handler.main
+    module: lib
+    events:
+      - http:
+          path: resizeImage
+          method: get
+          cors:
+          origin: '*'
+          headers:
+             - Content-Type
+             - X-Amz-Date
+             - Authorization
+             - X-Api-Key
+             - X-Amz-Security-Token
+             - X-Amz-User-Agent
+             - auth-lambda
+
+custom:
+  wsgi:
+    app: handler.main

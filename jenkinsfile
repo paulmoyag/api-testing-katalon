@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Start') {
+            steps {
+                notifyBuild('STARTED')      
+            }
+        }
+        stage('Clone sources') {
+            git url: 'https://github.com/paulmoyag/api-resize-images.git'
+        }
+
+        stage('Build') {
+            steps {
+
+                echo 'Building..'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing..'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying....'
+            }
+        }
+    }
+}
+
+def notifyBuild(String buildStatus = 'STARTED') {
+    buildStatus = buildStatus ?: 'SUCCESS'
+    String buildPhase = (buildStatus == 'STARTED') ? 'STARTED' : 'FINALIZED'
+    commit = (buildStatus == 'STARTED') ? 'null' : sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'")
+
+    sh """curl -H "Content-Type: application/json" -X POST -d '{
+        "name": "${env.JOB_NAME}",
+        "type": "pipeline",
+        "build": {
+            "phase": "${buildPhase}",
+            "status": "${buildStatus}",
+            "number": ${env.BUILD_ID},
+            "scm": {
+                "commit": "${commit}"
+            },
+            "artifacts": {}
+        }
+    }' https://devops.belcorp.biz/gestionar_despliegues_qa"""
+}

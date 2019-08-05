@@ -1,0 +1,15 @@
+# Byte-compiled / optimized / DLL files
+imagen.py
+images/
+__pycache__/
+lib/__pycache__/
+*.py[cod]
+*$py.class
+*.zip
+
+# Distribution / packaging
+config.py
+.Python
+build/
+develop-eggs/
+dist/
